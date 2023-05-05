@@ -8,9 +8,11 @@ readme = "README.md"
 keywords = ["ManageBac", "aSc", "timetable"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 click = "8.0"
 lxml = "^4.9.1"
+rich-click = "^1.6.1"
+rich = "^13.3.5"
 
 [tool.poetry.dev-dependencies]
 

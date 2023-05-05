@@ -16,7 +16,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 """
 
 import re
-import click
+from rich.console import Console
+console = Console()
+import rich_click as click
 import csv
 from lxml import etree
 
@@ -220,9 +222,15 @@ def main(xml_file, timetable_csv, classes_csv, smart_combine, combine_uniq_post,
             for index in range(largest):
                 group_id = groups[index]
                 class_id = classes[index]
+                if not classes[index] and len(classes) == 1:
+                    console.print(r"[yellow]Warning:[/] Lesson definition with multiple divisions but only one class. Using the first class as the default", f'{lesson=}')
+                    class_id = classes[0]
 
                 division = Json(lookup.get('groups').get(group_id)) if group_id is not None else Json()
                 class_ = Json(lookup.get('classes').get(class_id)) if class_id is not None else Json()
+
+                if not class_:
+                    console.print(f'[yellow]Warning: [/] No class information available that cooresponds to division. Number of divisions: {len(groups)}, number of classes: {len(classes)}', f'{lesson=}')
 
                 pattern = get_pattern(class_id_patterns, class_id_pattern)
                 uniq = eval(pattern)
@@ -233,12 +241,12 @@ def main(xml_file, timetable_csv, classes_csv, smart_combine, combine_uniq_post,
                 staging[uniq] = cards
 
                 section = eval(get_pattern(section_patterns, section_pattern))
-                match = re.match(r'^[\d]+', class_.short)
-                if match is None:
-                    print(f"Warning: Grade {class_.short} given for {uniq}? Using 0 instead", class_)
-                    year = 0
-                else:
-                    year = match.group()
+
+                ## Get the year which we'll put in the classes output
+                year = ''.join(filter(str.isdigit, class_.short))
+                if not year:
+                    console.print(f"[yellow]Warning[/yellow]: Expecting digits in 'short' as the Grade `class_.sort`. Using itself instead, or '<>' if none provided", f'{class_=}')
+                    year = class_.short or '<>'
 
                 if cards is None:
                     continue
@@ -291,11 +299,11 @@ def main(xml_file, timetable_csv, classes_csv, smart_combine, combine_uniq_post,
                             classes_file.append([uniq, f"Grade {year}", division.name, subject.short, '', teacher_emails, section])
 
     elif grouptype == 2:
-        print('grouptype == 2 not implemented yet')
+        console.print('[red bold]Critical error[/]: grouptype == 2 not implemented yet')
         exit(0)
 
     else:
-        print("uknown group type")
+        console.print("[red bold]Critical error[/] uknown group type")
         exit(0)
 
     # remove dups
@@ -313,7 +321,7 @@ def main(xml_file, timetable_csv, classes_csv, smart_combine, combine_uniq_post,
         for row in classes_file:
             writer.writerow(row)
 
-    print('\nProcess completed.')
-    print(f"Lessons processed: {process_info['num_lessons']}\nCards processed: {process_info['num_cards']}")
+    console.print('\n[green]Process completed.')
+    console.print(f"Lessons processed: {process_info['num_lessons']}\nCards processed: {process_info['num_cards']}")
 
 
