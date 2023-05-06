@@ -67,8 +67,7 @@ class Teacher(Json):
         """
         Conveniently override the email property to use an evaluated string
         """
-        #if 'email' in self.data and self.data.get('email'):
-        if 'email' in self.data:
+        if 'email' in self.data and self.data.get('email'):
             return self.data.email
         teacher = self
         pattern = "f'" + (self.default or '') + "'"
@@ -121,7 +120,7 @@ one single uniq ID is generated for all divisions and output as one class. Combi
 @click.option('--class_id_prefix', show_default=False, help="Add a prefix to every uniq ID", default='')
 @click.option('--class_id_suffix', show_default=False, help="Add a suffix to every uniq ID (for example the academic year)", default='')
 @click.option('--section_pattern', show_default=True, help="Defines the template used to output section for each class, default is `{int(division.divisiontag)+1}`", type=click.Choice(section_pattern_choices), default='default')
-@click.option('--teacher_email_pattern', show_default=False, help="""Defines the template used to output the teacher email. Default is `{".".join(teacher.name.split(' ')) + "@example.com"}`", default='{".".join(teacher.name.split(' ')) + "@example.com"}'""")
+@click.option('--teacher_email_pattern', show_default=False, help="""Defines the template used to output the teacher email. Default is `{".".join(teacher.name.split(' ')) + "@example.com"}`""")
 def main(xml_file, timetable_csv, classes_csv, smart_combine, combine_uniq_post, class_id_pattern, class_id_prefix, class_id_suffix, section_pattern, teacher_email_pattern):
     """
     Convert the data in an asc xml output into two csv files that can be bulk uploaded to ManageBac.
@@ -238,6 +237,10 @@ def main(xml_file, timetable_csv, classes_csv, smart_combine, combine_uniq_post,
 
                 pattern = get_pattern(class_id_patterns, class_id_pattern)
                 uniq = eval(pattern)
+                if class_id_prefix:
+                    uniq = f'{class_id_prefix}{uniq}'
+                if class_id_suffix:
+                    uniq = f'{uniq}{class_id_suffix}'
                 uniqs.append(uniq)
 
                 # all of the card placements
