@@ -54,9 +54,11 @@ class Teacher(Json):
     or it might not be. Some functionality is needed here to allow the end user define the pattern used to make the email
     for example by initials or firstname.lastname@example.com
     """
-    def __init__(self, data={}, default=''):
+    def __init__(self, data={}, default=None):
         if not data:
             data = {"name": "Unknown Teacher"}
+        if default is None:
+            default = '{".".join(teacher.name.split(' ')) + "@example.com"}'
         self.default = default
         Json.__init__(self, data, default)
 
@@ -65,11 +67,12 @@ class Teacher(Json):
         """
         Conveniently override the email property to use an evaluated string
         """
+        #if 'email' in self.data and self.data.get('email'):
         if 'email' in self.data:
             return self.data.email
         teacher = self
         pattern = "f'" + (self.default or '') + "'"
-        return eval(pattern)
+        return eval(pattern).lower()
 
 # eval used 
 class_id_patterns = [
@@ -214,6 +217,7 @@ def main(xml_file, timetable_csv, classes_csv, smart_combine, combine_uniq_post,
                 teacher_emails_list.append(teacher_obj)
             teacher_emails = "|".join([teacher.email if hasattr(teacher, 'email') else '' for teacher in teacher_emails_list])
 
+    
             combine = False
             if smart_combine and len(teachers) == 1 and largest > 1:
                 combine = True
