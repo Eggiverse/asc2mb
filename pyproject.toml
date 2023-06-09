@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "asc2mb"
-version = "0.7.1"
+version = "0.7.2"
 description = "Manage your timetable by pasing the XML export from asc and format into two files suitable for upload into ManageBac"
 authors = ["Adam Morris <adam.morris@fariaedu.com>"]
 license = "MIT"
